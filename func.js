@@ -255,6 +255,9 @@ App.draw = function() {
 };
 App.dataXYtoCanvasXY = function(x, y) {
   var zoom = 1.6;
+  if (navigator.userAgentData.mobile){
+    var zoom = 1.6 * 2;
+  }
   var xx = this.xC + x * zoom * this.dataToImageRatio,
       yy = this.yC + y * zoom * this.dataToImageRatio;
   
