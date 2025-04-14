@@ -28,11 +28,22 @@ canvas {
     font-size: 15px;
 }
 
+@media screen and (max-width: 1024px) {
+    .profile-card {
+        font-size: 30px;
+    }
+}
+
 .logo {
     width: 100px;
     height: 100px;
 }
-
+@media screen and (max-width: 1024px) {
+    .logo {
+        width: 200px;
+        height: 200px;
+    }
+}
 .info1 {
     margin-bottom: 10px;
 }
