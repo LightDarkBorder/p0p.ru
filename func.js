@@ -76,6 +76,15 @@ App.evolve = function() {
   var time2 = performance.now();
    
 };
+App.update = function() {
+  this.width = window.innerWidth;
+  this.height = window.innerHeight;
+  var canvas = document.getElementsByTagName('canvas')[0];
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  this.xC = this.width / 2;
+  this.yC = this.height / 2;
+};
 App.birth = function() {
   var x, y;
   var gridSpotIndex = Math.floor(Math.random() * this.gridMaxIndex),
@@ -261,3 +270,6 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   frame();
 });
+window.onresize = function(event) {
+  App.update();
+};
