@@ -1,8 +1,8 @@
 // Matrix background
 const canvas = document.getElementById("matrix-canvas");
 const ctx = canvas.getContext("2d");
-canvas.height = window.innerHeight;
-canvas.width = window.innerWidth;
+canvas.height = window.outerHeight
+canvas.width = window.outerWidth
 
 const letters = "01";
 const fontSize = 16;
