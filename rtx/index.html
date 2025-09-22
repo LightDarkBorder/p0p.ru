@@ -1,8 +1,10 @@
+<!doctype html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>WebGL Ray Tracer</title>
-        <script id="vshader" type="x-shader/x-vertex">
+
+<head>
+    <meta charset="utf-8">
+    <title>WebGL Ray Tracer</title>
+    <script id="vshader" type="x-shader/x-vertex">
             attribute vec2 vPosition;
             varying vec2 fPosition;
 
@@ -11,7 +13,7 @@
                 gl_Position = vec4(vPosition, 0.0, 1.0);
             }
         </script>
-        <script id="fshader" type="x-shader/x-fragment">
+    <script id="fshader" type="x-shader/x-fragment">
             precision highp float;
             varying vec2 fPosition;
 
@@ -277,86 +279,88 @@
                 gl_FragColor = vec4(color, 1.0);
             }
         </script>
-        <script>
-            var gl, program;
-            const glBounds = [
-                -1, 1,
-                1, 1,
-                -1, -1,
-                1, -1,
-            ];
-            var alpha = 0;
-            var lastFrameTime = Date.now();
-            var fps = 0;
+    <script>
+        var gl, program;
+        const glBounds = [
+            -1, 1,
+            1, 1,
+            -1, -1,
+            1, -1,
+        ];
+        var alpha = 0;
+        var lastFrameTime = Date.now();
+        var fps = 0;
 
-            function initShaders(gl, vertexShaderId, fragmentShaderId) {
-                var vertElem = document.getElementById(vertexShaderId);
-                var fragElem = document.getElementById(fragmentShaderId);
+        function initShaders(gl, vertexShaderId, fragmentShaderId) {
+            var vertElem = document.getElementById(vertexShaderId);
+            var fragElem = document.getElementById(fragmentShaderId);
 
-                const vertShdr = gl.createShader(gl.VERTEX_SHADER);
-                const fragShdr = gl.createShader(gl.FRAGMENT_SHADER);
+            const vertShdr = gl.createShader(gl.VERTEX_SHADER);
+            const fragShdr = gl.createShader(gl.FRAGMENT_SHADER);
 
-                gl.shaderSource(vertShdr, vertElem.text);
-                gl.compileShader(vertShdr);
-                gl.shaderSource(fragShdr, fragElem.text);
-                gl.compileShader(fragShdr);
+            gl.shaderSource(vertShdr, vertElem.text);
+            gl.compileShader(vertShdr);
+            gl.shaderSource(fragShdr, fragElem.text);
+            gl.compileShader(fragShdr);
 
-                var program = gl.createProgram();
-                gl.attachShader(program, vertShdr);
-                gl.attachShader(program, fragShdr);
-                gl.linkProgram(program);
-                return program;
+            var program = gl.createProgram();
+            gl.attachShader(program, vertShdr);
+            gl.attachShader(program, fragShdr);
+            gl.linkProgram(program);
+            return program;
+        }
+
+        function main() {
+            const canvas = document.querySelector('canvas');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            gl = canvas.getContext("webgl", undefined);
+
+            program = initShaders(gl, 'vshader', 'fshader');
+            gl.useProgram(program);
+            gl.viewport(0, 0, window.innerWidth, window.innerHeight);
+
+            const buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            var floats = new Float32Array(glBounds.length);
+            for (var i = 0; i < glBounds.length; ++i) {
+                floats[i] = glBounds[i];
             }
+            gl.bufferData(gl.ARRAY_BUFFER, floats, gl.STATIC_DRAW);
+            const pos = gl.getAttribLocation(program, 'vPosition');
+            gl.enableVertexAttribArray(pos);
+            gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
 
-            function main() {
-                const canvas = document.querySelector('canvas');
+            requestAnimationFrame(render);
 
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+            setInterval(() => {
+                const text = `${fps.toFixed(2)} fps`;
+                document.getElementById('fps').textContent = text;
+            }, 400);
+        }
 
-                gl = canvas.getContext("webgl", undefined);
+        function render() {
+            alpha = (alpha + 0.002) % 1;
+            gl.uniform1f(gl.getUniformLocation(program, 'alpha'), alpha);
+            const currFrameTime = Date.now();
+            fps = 1000 / (currFrameTime - lastFrameTime);
+            lastFrameTime = currFrameTime;
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            requestAnimationFrame(render);
+        }
+    </script>
+</head>
 
-                program = initShaders(gl, 'vshader', 'fshader');
-                gl.useProgram(program);
-                gl.viewport(0, 0, window.innerWidth, window.innerHeight);
-
-                const buffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-                var floats = new Float32Array(glBounds.length);
-                for ( var i = 0; i < glBounds.length; ++i ) {
-                    floats[i] = glBounds[i];
-                }
-                gl.bufferData(gl.ARRAY_BUFFER, floats, gl.STATIC_DRAW);
-                const pos = gl.getAttribLocation(program, 'vPosition');
-                gl.enableVertexAttribArray(pos);
-                gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-
-                requestAnimationFrame(render);
-
-                setInterval(() => {
-                    const text = `${fps.toFixed(2)} fps`;
-                    document.getElementById('fps').textContent = text;
-                }, 400);
-            }
-
-            function render() {
-                alpha = (alpha + 0.002) % 1;
-                gl.uniform1f(gl.getUniformLocation(program, 'alpha'), alpha);
-                const currFrameTime = Date.now();
-                fps = 1000 / (currFrameTime - lastFrameTime);
-                lastFrameTime = currFrameTime;
-                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-                requestAnimationFrame(render);
-            }
-        </script>
-    </head>
-    <body onload="main()" style="margin: 0px;">
+<body onload="main()" style="margin: 0px;">
+    <div>
         <div>
-            <div>
-                <span id="fps" style="position: absolute;color: white;"></span>
-            </div>
-            <canvas width="" height=""></canvas>
+            <span id="fps" style="position: absolute;color: white;"></span>
         </div>
-    </body>
+        <canvas width="" height=""></canvas>
+    </div>
+</body>
+
 </html>
